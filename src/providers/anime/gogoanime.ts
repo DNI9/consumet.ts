@@ -47,17 +47,27 @@ class Gogoanime extends AnimeParser {
   /**
    *
    * @param query search query string
+   * @param filters filters to apply
    * @param page page number (default 1) (optional)
    */
-  override search = async (query: string, page: number = 1): Promise<ISearch<IAnimeResult>> => {
+  override search = async (
+    query: string,
+    filters?: Record<string, string>,
+    page: number = 1
+  ): Promise<ISearch<IAnimeResult>> => {
     const searchResult: ISearch<IAnimeResult> = {
       currentPage: page,
       hasNextPage: false,
       results: [],
     };
+
+    const filterString = Object.entries(filters ?? {})
+      .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join('&');
+
     try {
       const res = await this.client.get(
-        `${this.baseUrl}/filter.html?keyword=${encodeURIComponent(query)}&page=${page}`
+        `${this.baseUrl}/filter.html?keyword=${encodeURIComponent(query)}&page=${page}${filterString}`
       );
 
       const $ = load(res.data);
