@@ -15,16 +15,20 @@ class Gogoanime extends models_1.AnimeParser {
         /**
          *
          * @param query search query string
+         * @param filters filters to apply
          * @param page page number (default 1) (optional)
          */
-        this.search = async (query, page = 1) => {
+        this.search = async (query, filters, page = 1) => {
             const searchResult = {
                 currentPage: page,
                 hasNextPage: false,
                 results: [],
             };
+            const filterString = Object.entries(filters !== null && filters !== void 0 ? filters : {})
+                .map(([key, value]) => `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                .join('&');
             try {
-                const res = await this.client.get(`${this.baseUrl}/filter.html?keyword=${encodeURIComponent(query)}&page=${page}`);
+                const res = await this.client.get(`${this.baseUrl}/filter.html?keyword=${encodeURIComponent(query)}&page=${page}${filterString}`);
                 const $ = (0, cheerio_1.load)(res.data);
                 searchResult.hasNextPage =
                     $('div.anime_name.new_series > div > div > ul > li.selected').next().length > 0;
@@ -98,10 +102,7 @@ class Gogoanime extends models_1.AnimeParser {
                         animeInfo.status = models_1.MediaStatus.UNKNOWN;
                         break;
                 }
-                animeInfo.otherName = $('div.anime_info_body_bg > p:nth-child(10)')
-                    .text()
-                    .replace('Other name: ', '')
-                    .replace(/;/g, ',');
+                animeInfo.otherName = $('[class*="other-name"] a').text().trim();
                 $('div.anime_info_body_bg > p:nth-child(7) > a').each((i, el) => {
                     var _a;
                     (_a = animeInfo.genres) === null || _a === void 0 ? void 0 : _a.push($(el).attr('title').toString());

@@ -10,9 +10,10 @@ declare class Gogoanime extends AnimeParser {
     /**
      *
      * @param query search query string
+     * @param filters filters to apply
      * @param page page number (default 1) (optional)
      */
-    search: (query: string, page?: number) => Promise<ISearch<IAnimeResult>>;
+    search: (query: string, filters?: Record<string, string>, page?: number) => Promise<ISearch<IAnimeResult>>;
     /**
      *
      * @param id anime id
